@@ -42,6 +42,10 @@ struct ContentView: View {
     // Trap color system
     @State private var buttonColor: ButtonColor = .normal
     @State private var colorTimer: Timer? = nil
+    
+    // high score state
+    @State private var highScore: Int = 0
+
 
     // Countdown publisher — fires every 1 second
     let countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
@@ -154,6 +158,17 @@ struct ContentView: View {
                 .font(.system(size: 72, weight: .black, design: .rounded))
                 .foregroundStyle(.blue)
 
+            // ← add this block
+            if highScore > 0 {
+                HStack(spacing: 6) {
+                    Image(systemName: score == highScore ? "trophy.fill" : "trophy")
+                        .foregroundStyle(.yellow)
+                    Text(score == highScore ? "New High Score!" : "Best: \(highScore)")
+                        .font(.subheadline.bold())
+                        .foregroundStyle(.secondary)
+                }
+            }
+
             Button(action: resetGame) {
                 Text("Play Again")
                     .font(.title2.bold())
@@ -231,6 +246,7 @@ struct ContentView: View {
         phase = .over
         colorTimer?.invalidate()
         colorTimer = nil
+        if score > highScore { highScore = score }
     }
 
     func resetGame() {
