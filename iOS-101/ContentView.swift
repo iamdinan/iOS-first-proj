@@ -30,7 +30,7 @@ enum GamePhase {
 // MARK: - ContentView
 struct ContentView: View {
 
-    // Core state
+    // Main state
     @State private var score: Int = 0
     @State private var timeLeft: Int = 10
     @State private var phase: GamePhase = .idle
@@ -47,7 +47,7 @@ struct ContentView: View {
     @State private var highScore: Int = 0
 
 
-    // Countdown publisher — fires every 1 second
+    // Countdown
     let countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     var body: some View {
@@ -73,7 +73,7 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Idle View
+    // MARK: - Homescreen View
     var idleView: some View {
         VStack(spacing: 24) {
             Text("TapFrenzy")
@@ -87,11 +87,11 @@ struct ContentView: View {
         .padding()
     }
 
-    // MARK: - Playing View
+    // MARK: - Gamescreen View
     var playingView: some View {
         VStack(spacing: 0) {
 
-            // Score + multiplier row
+            // Score and multiplier row
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("SCORE")
@@ -115,12 +115,12 @@ struct ContentView: View {
 
             Spacer()
 
-            // Main tap button
+            //tap button
             tapButton
 
             Spacer()
 
-            // Timer bar + countdown
+            // Timer and countdown
             VStack(spacing: 8) {
                 GeometryReader { geo in
                     ZStack(alignment: .leading) {
@@ -144,7 +144,7 @@ struct ContentView: View {
         }
     }
 
-    // MARK: - Game Over View
+    // MARK: - Gameover View
     var gameOverView: some View {
         VStack(spacing: 20) {
             Text("Time's Up!")
@@ -158,7 +158,7 @@ struct ContentView: View {
                 .font(.system(size: 72, weight: .black, design: .rounded))
                 .foregroundStyle(.blue)
 
-            // ← add this block
+            //highscore panel
             if highScore > 0 {
                 HStack(spacing: 6) {
                     Image(systemName: score == highScore ? "trophy.fill" : "trophy")
@@ -213,7 +213,7 @@ struct ContentView: View {
         // Combo logic
         let now = Date()
         if let last = lastTapTime, now.timeIntervalSince(last) <= 0.5 {
-            multiplier = min(multiplier + 1, 8)   // cap at ×8
+            multiplier = min(multiplier + 1, 8)
         } else {
             multiplier = 1
         }
@@ -227,7 +227,7 @@ struct ContentView: View {
             score += 2 * multiplier
         case .grey:
             score = max(0, score - 5)
-            multiplier = 1               // break combo on trap
+            multiplier = 1               // combo break when trap hit
         }
     }
 
@@ -270,7 +270,7 @@ struct ContentView: View {
                 buttonColor = [.green, .grey, .normal, .normal][roll]
             }
 
-            // Hold the special color for 1–2 seconds, then revert
+            // Hold special color couple seconds and revert
             let holdTime = Double.random(in: 1.0...2.0)
             Timer.scheduledTimer(withTimeInterval: holdTime, repeats: false) { _ in
                 guard phase == .playing else { return }
