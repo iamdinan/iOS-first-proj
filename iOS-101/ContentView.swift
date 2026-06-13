@@ -1,15 +1,15 @@
 import SwiftUI
 internal import Combine
 
-// MARK: - Button Color State
+// MARK: - Button Color States
 enum ButtonColor: CaseIterable {
-    case normal, green, grey
+    case normal, green, red
 
     var color: Color {
         switch self {
         case .normal: return .blue
         case .green:  return .green
-        case .grey:   return Color(.systemGray3)
+        case .red:   return Color(.systemRed)
         }
     }
 
@@ -17,7 +17,7 @@ enum ButtonColor: CaseIterable {
         switch self {
         case .normal: return "TAP!"
         case .green:  return "BONUS!"
-        case .grey:   return "TRAP!"
+        case .red:   return "TRAP!"
         }
     }
 }
@@ -35,11 +35,11 @@ struct ContentView: View {
     @State private var timeLeft: Int = 10
     @State private var phase: GamePhase = .idle
 
-    // Combo system
+    // Combo states
     @State private var multiplier: Int = 1
     @State private var lastTapTime: Date? = nil
 
-    // Trap color system
+    // Trap color states
     @State private var buttonColor: ButtonColor = .normal
     @State private var colorTimer: Timer? = nil
     
@@ -184,7 +184,7 @@ struct ContentView: View {
         .padding()
     }
 
-    // MARK: - Tap Button (shared)
+    // MARK: - shared Tap Button
     var tapButton: some View {
         Button(action: handleTap) {
             Text(phase == .playing ? buttonColor.label : "START")
@@ -225,7 +225,7 @@ struct ContentView: View {
             score += 1 * multiplier
         case .green:
             score += 2 * multiplier
-        case .grey:
+        case .red:
             score = max(0, score - 5)
             multiplier = 1               // combo break when trap hit
         }
@@ -267,7 +267,7 @@ struct ContentView: View {
             // 25% green, 25% grey, 50% normal
             let roll = Int.random(in: 0...3)
             withAnimation(.easeInOut(duration: 0.25)) {
-                buttonColor = [.green, .grey, .normal, .normal][roll]
+                buttonColor = [.green, .red, .normal, .normal][roll]
             }
 
             // Hold special color couple seconds and revert
