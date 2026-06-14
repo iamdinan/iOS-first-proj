@@ -1,4 +1,5 @@
 import SwiftUI
+internal import Combine
 
 @Observable
 class LightItUpViewModel {
@@ -96,5 +97,7 @@ class LightItUpViewModel {
 }
 
 private class LightItUpStorage: ObservableObject {
+    var objectWillChange = ObservableObjectPublisher()
+    
     @AppStorage("lightItUpHighScore") var highScore = 0
 }
