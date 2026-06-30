@@ -4,23 +4,18 @@ internal import Combine
 @Observable
 class LightItUpViewModel {
 
-    // MARK: - State
     var score           = 0
     var timeLeft        = 60
     var phase           = GamePhase.idle
     var cards: [Card]   = []
     var level           = LIULevel.all[0]
     var showLevelFlash  = false
+    var isNewHighScore  = false
 
     @ObservationIgnored
     private var litTimer: Timer? = nil
-    @ObservationIgnored
-    private let storage = LightItUpStorage()
 
-    var highScore: Int {
-        get { storage.highScore }
-        set { storage.highScore = newValue }
-    }
+    let highScoreStore = HighScoreStore(key: "lightItUpTopScores")
 
     // MARK: - Tap
     func handleCardTap(_ card: Card) {
@@ -38,6 +33,7 @@ class LightItUpViewModel {
     // MARK: - Lifecycle
     func startGame() {
         score = 0; timeLeft = 60; phase = .playing
+        isNewHighScore = false
         applyLevel(LIULevel.current(for: timeLeft))
     }
 
@@ -54,7 +50,8 @@ class LightItUpViewModel {
     func endGame() {
         phase = .over
         litTimer?.invalidate(); litTimer = nil
-        if score > highScore { highScore = score }
+        isNewHighScore = score > highScoreStore.best
+        highScoreStore.submit(score)
     }
 
     func resetGame() {

@@ -1,10 +1,6 @@
-import SwiftUI
-internal import Combine
-
 @Observable
 class TapFrenzyViewModel {
 
-    // MARK: - State
     var score       = 0
     var timeLeft    = 10
     var phase       = GamePhase.idle
@@ -15,13 +11,10 @@ class TapFrenzyViewModel {
     private var lastTapTime: Date? = nil
     @ObservationIgnored
     private var colorTimer: Timer? = nil
-    @ObservationIgnored
-    private let storage = TapFrenzyStorage()
 
-    var highScore: Int {
-        get { storage.highScore }
-        set { storage.highScore = newValue }
-    }
+    let highScoreStore = HighScoreStore(key: "tapFrenzyTopScores")
+
+    var isNewHighScore = false   // for game-over messaging
 
     // MARK: - Tap
     func handleTap() {
@@ -47,6 +40,7 @@ class TapFrenzyViewModel {
     func startGame() {
         score = 0; timeLeft = 10; multiplier = 1
         lastTapTime = nil; buttonColor = .normal; phase = .playing
+        isNewHighScore = false
         scheduleColorChanges()
     }
 
@@ -58,7 +52,8 @@ class TapFrenzyViewModel {
     func endGame() {
         phase = .over
         colorTimer?.invalidate(); colorTimer = nil
-        if score > highScore { highScore = score }
+        isNewHighScore = score > highScoreStore.best
+        highScoreStore.submit(score)
     }
 
     func resetGame() {
@@ -84,9 +79,4 @@ class TapFrenzyViewModel {
             }
         }
     }
-}
-
-// Thin wrapper so @Observable class can use @AppStorage
-private class TapFrenzyStorage: ObservableObject {
-    @AppStorage("tapFrenzyHighScore") var highScore = 0
 }

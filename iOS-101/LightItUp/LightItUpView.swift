@@ -4,6 +4,7 @@ internal import Combine
 struct LightItUpView: View {
 
     @State private var vm = LightItUpViewModel()
+    @State private var showHighScores = false
 
     let roundTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -28,6 +29,13 @@ struct LightItUpView: View {
         }
         .onReceive(roundTimer) { _ in vm.tick() }
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showHighScores) {
+            HighScoreListView(
+                title: "Light It Up — Top 10",
+                accentColor: .indigo,
+                scores: vm.highScoreStore.topScores
+            )
+        }
     }
 
     // MARK: - Idle
@@ -114,14 +122,10 @@ struct LightItUpView: View {
                 .font(.system(size: 72, weight: .black, design: .rounded))
                 .foregroundStyle(.indigo)
 
-            if vm.highScore > 0 {
-                HStack(spacing: 6) {
-                    Image(systemName: vm.score == vm.highScore ? "trophy.fill" : "trophy")
-                        .foregroundStyle(.yellow)
-                    Text(vm.score == vm.highScore ? "New High Score!" : "Best: \(vm.highScore)")
-                        .font(.subheadline.bold())
-                        .foregroundStyle(.secondary)
-                }
+            if vm.isNewHighScore {
+                Label("New High Score!", systemImage: "trophy.fill")
+                    .font(.subheadline.bold())
+                    .foregroundStyle(.yellow)
             }
 
             Button(action: vm.resetGame) {
@@ -134,7 +138,14 @@ struct LightItUpView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 18))
             }
             .padding(.horizontal, 40)
-            .padding(.top, 12)
+
+            Button(action: { showHighScores = true }) {   // ← new
+                Label("High Scores", systemImage: "list.number")
+                    .font(.subheadline.bold())
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+            }
+            .padding(.horizontal, 40)
         }
         .padding()
     }

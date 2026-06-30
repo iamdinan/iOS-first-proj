@@ -4,6 +4,7 @@ internal import Combine
 struct TapFrenzyView: View {
 
     @State private var vm = TapFrenzyViewModel()
+    @State private var showHighScores = false   // ← new
 
     let countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -18,6 +19,13 @@ struct TapFrenzyView: View {
         }
         .onReceive(countdownTimer) { _ in vm.tick() }
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showHighScores) {           // ← new
+            HighScoreListView(
+                title: "Tap Frenzy — Top 10",
+                accentColor: .blue,
+                scores: vm.highScoreStore.topScores
+            )
+        }
     }
 
     // MARK: - Idle
@@ -83,7 +91,7 @@ struct TapFrenzyView: View {
     }
 
     // MARK: - Game Over
-    var gameOverView: some View {
+   var gameOverView: some View {
         VStack(spacing: 20) {
             Text("Time's Up!").font(.largeTitle.bold())
             Text("Final Score").font(.headline).foregroundStyle(.secondary)
@@ -91,14 +99,10 @@ struct TapFrenzyView: View {
                 .font(.system(size: 72, weight: .black, design: .rounded))
                 .foregroundStyle(.blue)
 
-            if vm.highScore > 0 {
-                HStack(spacing: 6) {
-                    Image(systemName: vm.score == vm.highScore ? "trophy.fill" : "trophy")
-                        .foregroundStyle(.yellow)
-                    Text(vm.score == vm.highScore ? "New High Score!" : "Best: \(vm.highScore)")
-                        .font(.subheadline.bold())
-                        .foregroundStyle(.secondary)
-                }
+            if vm.isNewHighScore {
+                Label("New High Score!", systemImage: "trophy.fill")
+                    .font(.subheadline.bold())
+                    .foregroundStyle(.yellow)
             }
 
             Button(action: vm.resetGame) {
@@ -111,7 +115,14 @@ struct TapFrenzyView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 18))
             }
             .padding(.horizontal, 40)
-            .padding(.top, 12)
+
+            Button(action: { showHighScores = true }) {   // ← new
+                Label("High Scores", systemImage: "list.number")
+                    .font(.subheadline.bold())
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+            }
+            .padding(.horizontal, 40)
         }
         .padding()
     }
