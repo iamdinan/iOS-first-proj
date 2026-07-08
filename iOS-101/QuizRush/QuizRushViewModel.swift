@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+internal import Combine
 
 enum QuizState {
     case loading

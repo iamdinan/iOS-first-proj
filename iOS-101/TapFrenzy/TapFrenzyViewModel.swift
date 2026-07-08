@@ -1,3 +1,4 @@
+import SwiftUI
 @Observable
 class TapFrenzyViewModel {
 
