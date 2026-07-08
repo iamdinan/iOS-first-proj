@@ -60,21 +60,21 @@ class QuizRushViewModel: ObservableObject {
     }
 
     private static func message(for error: Error) -> String {
-        switch error {
-        case TriviaError.rateLimited:
-            return "Too many requests. Wait a few seconds and retry."
-        case TriviaError.noResults:
-            return "No questions available right now. Please retry."
-        case TriviaError.badResponse:
-            return "The trivia server didn't respond properly. Please retry."
-        case TriviaError.decodingFailed:
-            return "Couldn't read the trivia data. Please retry."
-        case TriviaError.network:
-            return "No connection. Check your network and retry."
-        default:
-            return "Something went wrong. Please retry."
-        }
+    switch error {
+    case TriviaError.badResponse:
+        return "The trivia server didn't respond properly. Please retry."
+    case TriviaError.decodingFailed:
+        return "Couldn't read the trivia data. Please retry."
+    case TriviaError.rateLimited:
+        return "Too many requests. Wait a few seconds and retry."
+    case TriviaError.noResults:
+        return "No questions available right now. Please retry."
+    case TriviaError.network:
+        return "No connection. Check your network and retry."
+    default:
+        return "Something went wrong. Please retry."
     }
+}
 
     // MARK: - Answering
     func selectAnswer(_ answer: String) {

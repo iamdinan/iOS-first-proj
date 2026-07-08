@@ -42,14 +42,24 @@ struct QuizQuestion: Identifiable {
 // MARK: - HTML Entity Decoding
 private extension String {
     var htmlDecoded: String {
-        guard let data = self.data(using: .utf8) else { return self }
-        let options: [NSAttributedString.DocumentReadingOptionKey: Any] = [
-            .documentType: NSAttributedString.DocumentType.html,
-            .characterEncoding: String.Encoding.utf8.rawValue
+        var s = self
+        let entities: [(String, String)] = [
+            ("&amp;",   "&"),
+            ("&lt;",    "<"),
+            ("&gt;",    ">"),
+            ("&quot;",  "\""),
+            ("&#039;",  "'"),
+            ("&apos;",  "'"),
+            ("&ndash;", "–"),
+            ("&mdash;", "—"),
+            ("&laquo;", "«"),
+            ("&raquo;", "»"),
+            ("&ldquo;", "\u{201C}"),
+            ("&rdquo;", "\u{201D}"),
+            ("&lsquo;", "\u{2018}"),
+            ("&rsquo;", "\u{2019}"),
         ]
-        guard let attributed = try? NSAttributedString(data: data, options: options, documentAttributes: nil) else {
-            return self
-        }
-        return attributed.string
+        for (entity, char) in entities { s = s.replacingOccurrences(of: entity, with: char) }
+        return s
     }
 }
