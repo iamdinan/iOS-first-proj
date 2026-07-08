@@ -2,7 +2,13 @@ import Foundation
 
 // MARK: - API Response Shape
 struct TriviaResponse: Codable {
+    let responseCode: Int
     let results: [TriviaQuestion]
+
+    enum CodingKeys: String, CodingKey {
+        case responseCode = "response_code"
+        case results
+    }
 }
 
 struct TriviaQuestion: Codable {
