@@ -1,23 +1,28 @@
+//
+//  LightItUpVM.swift
+//  iOS-101
+//
+//  Created by Student1 on 2026-07-08.
+//
+
 import SwiftUI
-internal import Combine
 
 @Observable
-class LightItUpViewModel {
+final class LightItUpVM {
 
-    var score           = 0
-    var timeLeft        = 60
-    var phase           = GamePhase.idle
-    var cards: [Card]   = []
-    var level           = LIULevel.all[0]
-    var showLevelFlash  = false
-    var isNewHighScore  = false
+    var score          = 0
+    var timeLeft       = 60
+    var phase          = GamePhase.idle
+    var cards:         [Card]    = []
+    var level          = LIULevel.all[0]
+    var showLevelFlash = false
+    var isNewBest      = false
 
-    @ObservationIgnored
-    private var litTimer: Timer? = nil
+    @ObservationIgnored var onSessionEnd: ((Int) -> Void)? = nil
+    @ObservationIgnored private var litTimer: Timer? = nil
 
     let highScoreStore = HighScoreStore(key: "lightItUpTopScores")
 
-    // MARK: - Tap
     func handleCardTap(_ card: Card) {
         guard phase == .playing else { return }
         if card.isLit {
@@ -30,28 +35,22 @@ class LightItUpViewModel {
         }
     }
 
-    // MARK: - Lifecycle
     func startGame() {
-        score = 0; timeLeft = 60; phase = .playing
-        isNewHighScore = false
+        score = 0; timeLeft = 60; isNewBest = false; phase = .playing
         applyLevel(LIULevel.current(for: timeLeft))
     }
 
     func tick() {
         guard phase == .playing else { return }
-        if timeLeft > 0 {
-            timeLeft -= 1
-            updateLevelIfNeeded()
-        } else {
-            endGame()
-        }
+        if timeLeft > 0 { timeLeft -= 1; updateLevelIfNeeded() } else { endGame() }
     }
 
     func endGame() {
         phase = .over
         litTimer?.invalidate(); litTimer = nil
-        isNewHighScore = score > highScoreStore.best
+        isNewBest = score > highScoreStore.best
         highScoreStore.submit(score)
+        onSessionEnd?(score)
     }
 
     func resetGame() {
@@ -59,18 +58,15 @@ class LightItUpViewModel {
         litTimer?.invalidate(); litTimer = nil
     }
 
-    // MARK: - Level
     private func updateLevelIfNeeded() {
-        let newLevel = LIULevel.current(for: timeLeft)
-        guard newLevel.number != level.number else { return }
-        applyLevel(newLevel)
-        flashLevelOverlay()
+        let next = LIULevel.current(for: timeLeft)
+        guard next.number != level.number else { return }
+        applyLevel(next); flashLevelOverlay()
     }
 
-    private func applyLevel(_ newLevel: LIULevel) {
-        level = newLevel
-        litTimer?.invalidate()
-        cards = (0..<newLevel.totalCards).map { Card(id: $0) }
+    private func applyLevel(_ l: LIULevel) {
+        level = l; litTimer?.invalidate()
+        cards = (0..<l.totalCards).map { Card(id: $0) }
         scheduleLitCycle()
     }
 
@@ -91,10 +87,4 @@ class LightItUpViewModel {
             withAnimation(.easeOut(duration: 0.3)) { self?.showLevelFlash = false }
         }
     }
-}
-
-private class LightItUpStorage: ObservableObject {
-    var objectWillChange = ObservableObjectPublisher()
-    
-    @AppStorage("lightItUpHighScore") var highScore = 0
 }

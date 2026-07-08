@@ -1,9 +1,16 @@
+//
+//  HighScoreListView.swift
+//  iOS-101
+//
+//  Created by Student1 on 2026-07-08.
+//
+
 import SwiftUI
 
 struct HighScoreListView: View {
-    let title: String
+    let title:       String
     let accentColor: Color
-    let scores: [ScoreEntry]
+    let scores:      [ScoreEntry]
 
     @Environment(\.dismiss) private var dismiss
 
@@ -20,12 +27,9 @@ struct HighScoreListView: View {
                                 .font(.subheadline.bold())
                                 .foregroundStyle(index == 0 ? accentColor : .secondary)
                                 .frame(width: 36, alignment: .leading)
-
                             Text("\(entry.score)")
                                 .font(.title3.bold())
-
                             Spacer()
-
                             Text(entry.date, style: .date)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
@@ -43,12 +47,4 @@ struct HighScoreListView: View {
             }
         }
     }
-}
-
-#Preview {
-    HighScoreListView(
-        title: "Tap Frenzy — Top 10",
-        accentColor: .blue,
-        scores: [ScoreEntry(score: 42), ScoreEntry(score: 30)]
-    )
 }

@@ -1,30 +1,31 @@
+//
+//  TriviaAPI.swift
+//  iOS-101
+//
+//  Created by Student1 on 2026-07-08.
+//
+
 import Foundation
 
 enum TriviaError: Error {
-    case badResponse
-    case decodingFailed
-    case network(Error)
-    case rateLimited
-    case noResults
+    case badResponse, decodingFailed, rateLimited, noResults, network(Error)
 }
 
-struct TriviaService {
-
+struct TriviaAPI {
     private let endpoint = URL(string: "https://opentdb.com/api.php?amount=10&type=multiple")!
 
     private let session: URLSession = {
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 15
-        config.timeoutIntervalForResource = 15
-        return URLSession(configuration: config)   // ← use this, not .shared
+        let cfg = URLSessionConfiguration.default
+        cfg.timeoutIntervalForRequest  = 15
+        cfg.timeoutIntervalForResource = 15
+        return URLSession(configuration: cfg)
     }()
 
     func fetchQuestions() async throws -> [QuizQuestion] {
         let data: Data
         let response: URLResponse
-
         do {
-            (data, response) = try await session.data(from: endpoint)   // ← session, not .shared
+            (data, response) = try await session.data(from: endpoint)
         } catch {
             throw TriviaError.network(error)
         }
@@ -41,15 +42,11 @@ struct TriviaService {
             } catch {
                 throw TriviaError.decodingFailed
             }
-
-            // Check Open Trivia DB's own response code
-            // 0 = success, 5 = rate limited, anything else = no results available
             switch decoded.responseCode {
             case 0: break
             case 5: throw TriviaError.rateLimited
             default: throw TriviaError.noResults
             }
-
             guard !decoded.results.isEmpty else { throw TriviaError.noResults }
             return decoded.results.map(QuizQuestion.init)
         }.value

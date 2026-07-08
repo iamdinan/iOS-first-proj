@@ -1,12 +1,17 @@
+//
+//  LIUModels.swift
+//  iOS-101
+//
+//  Created by Student1 on 2026-07-08.
+//
+
 import SwiftUI
 
-// MARK: - Card
 struct Card: Identifiable {
     let id: Int
     var isLit: Bool = false
 }
 
-// MARK: - Level
 struct LIULevel {
     let number: Int
     let columns: Int

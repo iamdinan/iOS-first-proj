@@ -1,23 +1,28 @@
-import SwiftUI
+//
+//  HighScoreStore.swift
+//  iOS-101
+//
+//  Created by Student1 on 2026-07-08.
+//
+
+import Foundation
 
 struct ScoreEntry: Identifiable, Codable {
-    let id: UUID
+    let id:    UUID
     let score: Int
-    let date: Date
+    let date:  Date
 
     init(score: Int, date: Date = Date()) {
-        self.id = UUID()
+        self.id    = UUID()
         self.score = score
-        self.date = date
+        self.date  = date
     }
 }
 
 @Observable
-class HighScoreStore {
-
+final class HighScoreStore {
     private let storageKey: String
     private let maxEntries = 10
-
     var topScores: [ScoreEntry] = []
 
     init(key: String) {
@@ -30,10 +35,8 @@ class HighScoreStore {
     @discardableResult
     func submit(_ score: Int) -> Bool {
         guard score > 0 else { return false }
-
         let qualifies = topScores.count < maxEntries || score > (topScores.last?.score ?? 0)
         guard qualifies else { return false }
-
         topScores.append(ScoreEntry(score: score))
         topScores.sort { $0.score > $1.score }
         if topScores.count > maxEntries {
@@ -44,7 +47,7 @@ class HighScoreStore {
     }
 
     private func load() {
-        guard let data = UserDefaults.standard.data(forKey: storageKey),
+        guard let data    = UserDefaults.standard.data(forKey: storageKey),
               let decoded = try? JSONDecoder().decode([ScoreEntry].self, from: data)
         else { return }
         topScores = decoded

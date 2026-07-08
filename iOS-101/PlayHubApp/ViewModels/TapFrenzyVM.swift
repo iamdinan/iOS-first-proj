@@ -1,23 +1,29 @@
+//
+//  TapFrenzyVM.swift
+//  iOS-101
+//
+//  Created by Student1 on 2026-07-08.
+//
+
 import SwiftUI
+
 @Observable
-class TapFrenzyViewModel {
+final class TapFrenzyVM {
 
     var score       = 0
     var timeLeft    = 10
     var phase       = GamePhase.idle
     var multiplier  = 1
     var buttonColor = ButtonColor.normal
+    var isNewBest   = false
 
-    @ObservationIgnored
-    private var lastTapTime: Date? = nil
-    @ObservationIgnored
-    private var colorTimer: Timer? = nil
+    @ObservationIgnored var onSessionEnd: ((Int) -> Void)? = nil
+
+    @ObservationIgnored private var lastTapTime: Date?   = nil
+    @ObservationIgnored private var colorTimer:  Timer?  = nil
 
     let highScoreStore = HighScoreStore(key: "tapFrenzyTopScores")
 
-    var isNewHighScore = false   // for game-over messaging
-
-    // MARK: - Tap
     func handleTap() {
         if phase == .idle { startGame(); return }
         guard phase == .playing, timeLeft > 0 else { return }
@@ -37,11 +43,10 @@ class TapFrenzyViewModel {
         }
     }
 
-    // MARK: - Lifecycle
     func startGame() {
         score = 0; timeLeft = 10; multiplier = 1
-        lastTapTime = nil; buttonColor = .normal; phase = .playing
-        isNewHighScore = false
+        lastTapTime = nil; buttonColor = .normal
+        phase = .playing; isNewBest = false
         scheduleColorChanges()
     }
 
@@ -53,8 +58,9 @@ class TapFrenzyViewModel {
     func endGame() {
         phase = .over
         colorTimer?.invalidate(); colorTimer = nil
-        isNewHighScore = score > highScoreStore.best
+        isNewBest = score > highScoreStore.best
         highScoreStore.submit(score)
+        onSessionEnd?(score)
     }
 
     func resetGame() {
@@ -62,7 +68,6 @@ class TapFrenzyViewModel {
         multiplier = 1; buttonColor = .normal
     }
 
-    // MARK: - Color Trap
     private func scheduleColorChanges() {
         colorTimer?.invalidate()
         let delay = Double.random(in: 1.5...3.0)
@@ -72,8 +77,8 @@ class TapFrenzyViewModel {
             withAnimation(.easeInOut(duration: 0.25)) {
                 self.buttonColor = [.green, .grey, .normal, .normal][roll]
             }
-            let holdTime = Double.random(in: 1.0...2.0)
-            Timer.scheduledTimer(withTimeInterval: holdTime, repeats: false) { [weak self] _ in
+            let hold = Double.random(in: 1.0...2.0)
+            Timer.scheduledTimer(withTimeInterval: hold, repeats: false) { [weak self] _ in
                 guard let self, self.phase == .playing else { return }
                 withAnimation(.easeInOut(duration: 0.25)) { self.buttonColor = .normal }
                 self.scheduleColorChanges()

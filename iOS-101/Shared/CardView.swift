@@ -1,7 +1,14 @@
+//
+//  CardView.swift
+//  iOS-101
+//
+//  Created by Student1 on 2026-07-08.
+//
+
 import SwiftUI
 
 struct CardView: View {
-    let card: Card
+    let card:      Card
     let glowColor: Color
 
     var body: some View {
@@ -16,9 +23,4 @@ struct CardView: View {
             .scaleEffect(card.isLit ? 1.05 : 1.0)
             .animation(.easeInOut(duration: 0.15), value: card.isLit)
     }
-}
-
-#Preview {
-    CardView(card: Card(id: 0, isLit: true), glowColor: .cyan)
-        .padding()
 }
