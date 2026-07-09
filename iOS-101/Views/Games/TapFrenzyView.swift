@@ -8,12 +8,30 @@
 import SwiftUI
 internal import Combine
 
+extension View {
+    func disableSwipeBack(_ disabled: Bool) -> some View {
+        background(SwipeBackDisabler(disabled: disabled))
+    }
+}
+
+private struct SwipeBackDisabler: UIViewControllerRepresentable {
+    let disabled: Bool
+    func makeUIViewController(context: Context) -> UIViewController { UIViewController() }
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        DispatchQueue.main.async {
+            uiViewController.navigationController?.interactivePopGestureRecognizer?.isEnabled = !disabled
+        }
+    }
+}
+
 struct TapFrenzyView: View {
 
     var onSessionEnd: ((GameMode, Int) -> Void)? = nil
 
     @State private var vm = TapFrenzyVM()
     @State private var showHighScores = false
+    @State private var showExitConfirm = false
+    @Environment(\.dismiss) private var dismiss
 
     let countdownTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -44,12 +62,27 @@ struct TapFrenzyView: View {
                               accentColor: .blue,
                               scores: vm.highScoreStore.topScores)
         }
+        .navigationBarBackButtonHidden(vm.phase == .playing)
+        .toolbar {
+            if vm.phase == .playing {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Quit") { showExitConfirm = true }
+                }
+            }
+        }
+        .alert("Quit game?", isPresented: $showExitConfirm) {
+            Button("Quit", role: .destructive) { vm.resetGame(); dismiss() }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Your current run will be lost.")
+        }
+        .disableSwipeBack(vm.phase == .playing)
     }
 
     var idleView: some View {
         VStack(spacing: 24) {
             Text("Tap Frenzy").font(.largeTitle.bold())
-            Text("Tap as fast as you can!\nGreen = ×2 bonus · Grey = −5 penalty")
+            Text("Tap as fast as you can!\nGreen = ×2 bonus · Red = −5 penalty")
                 .font(.subheadline).multilineTextAlignment(.center).foregroundStyle(.secondary)
             tapButton
         }

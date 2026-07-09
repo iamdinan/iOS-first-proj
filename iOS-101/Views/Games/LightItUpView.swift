@@ -14,6 +14,8 @@ struct LightItUpView: View {
 
     @State private var vm = LightItUpVM()
     @State private var showHighScores = false
+    @State private var showExitConfirm = false
+    @Environment(\.dismiss) private var dismiss
 
     let roundTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
@@ -55,6 +57,21 @@ struct LightItUpView: View {
                               accentColor: .indigo,
                               scores: vm.highScoreStore.topScores)
         }
+        .navigationBarBackButtonHidden(vm.phase == .playing)
+        .toolbar {
+            if vm.phase == .playing {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Quit") { showExitConfirm = true }
+                }
+            }
+        }
+        .alert("Quit game?", isPresented: $showExitConfirm) {
+            Button("Quit", role: .destructive) { vm.resetGame(); dismiss() }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Your current run will be lost.")
+        }
+        .disableSwipeBack(vm.phase == .playing)
     }
 
     var idleView: some View {

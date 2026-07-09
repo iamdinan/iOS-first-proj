@@ -63,13 +63,6 @@ struct StatsTab: View {
                         }
                     }
                 }
-
-                // Reset
-                Section {
-                    Button("Reset All Stats", role: .destructive) {
-                        showResetConfirm = true
-                    }
-                }
             }
             .navigationTitle("Stats")
             .onAppear { vm.load() }

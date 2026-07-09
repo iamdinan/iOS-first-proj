@@ -11,6 +11,8 @@ struct SettingsTab: View {
     @AppStorage("notificationsEnabled") private var notificationsEnabled = false
     @AppStorage("challengeHour")        private var challengeHour        = 9
     @AppStorage("challengeMinute")      private var challengeMinute      = 0
+    @State private var statsVM = StatsVM()
+    @State private var showResetConfirm = false
 
     @State private var permissionGranted = false
 
@@ -59,9 +61,24 @@ struct SettingsTab: View {
                     LabeledContent("Version", value: "1.0.0")
                     LabeledContent("Modes",   value: "3")
                 }
+                
+                Section {
+                    Button("Reset All Stats", role: .destructive) {
+                        showResetConfirm = true
+                    }
+                } footer: {
+                    Text("Clears all game sessions, scores, and map history. This cannot be undone.")
+                }
             }
             .navigationTitle("Settings")
             .task { await checkPermission() }
+            .confirmationDialog("Reset all stats?",
+                                isPresented: $showResetConfirm,
+                                titleVisibility: .visible) {
+                Button("Reset Everything", role: .destructive) { statsVM.deleteAll() }
+            } message: {
+                Text("This cannot be undone.")
+            }
         }
     }
 
