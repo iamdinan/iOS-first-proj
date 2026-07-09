@@ -13,6 +13,8 @@ struct QuizRushView: View {
 
     @StateObject private var vm = QuizRushVM()
     @State private var showHighScores = false
+    @State private var showExitConfirm = false
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         ZStack {
@@ -45,7 +47,27 @@ struct QuizRushView: View {
                               accentColor: .purple,
                               scores: vm.highScoreStore.topScores)
         }
+        .navigationBarBackButtonHidden(isQuizActive)
+                .toolbar {
+                    if isQuizActive {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            Button("Quit") { showExitConfirm = true }
+                        }
+                    }
+                }
+                .alert("Quit game?", isPresented: $showExitConfirm) {
+                    Button("Quit", role: .destructive) { dismiss() }
+                    Button("Cancel", role: .cancel) { }
+                } message: {
+                    Text("Your current progress will be lost.")
+                }
+                .disableSwipeBack(isQuizActive)
     }
+    
+    private var isQuizActive: Bool {
+            if case .loaded = vm.state { return !vm.isRoundComplete }
+            return false
+        }
 
     var loadingView: some View {
         VStack(spacing: 16) {
