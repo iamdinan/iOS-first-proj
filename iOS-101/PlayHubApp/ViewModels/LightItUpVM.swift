@@ -17,6 +17,9 @@ final class LightItUpVM {
     var level          = LIULevel.all[0]
     var showLevelFlash = false
     var isNewBest      = false
+    var lives          = 3
+    let maxLives       = 3
+    var showLifeLostFlash = false
 
     @ObservationIgnored var onSessionEnd: ((Int) -> Void)? = nil
     @ObservationIgnored private var litTimer: Timer? = nil
@@ -32,11 +35,13 @@ final class LightItUpVM {
             }
         } else {
             score = max(0, score - 1)
+            loseLife()
         }
     }
 
     func startGame() {
         score = 0; timeLeft = 60; isNewBest = false; phase = .playing
+        lives = maxLives
         applyLevel(LIULevel.current(for: timeLeft))
     }
 
@@ -55,7 +60,24 @@ final class LightItUpVM {
 
     func resetGame() {
         phase = .idle; score = 0; timeLeft = 60; cards = []
+        lives = maxLives
         litTimer?.invalidate(); litTimer = nil
+    }
+    
+    private func loseLife() {
+        guard lives > 0 else { return }
+        lives -= 1
+        flashLifeLost()
+        if lives == 0 {
+            endGame()
+        }
+    }
+
+    private func flashLifeLost() {
+        withAnimation(.easeIn(duration: 0.08)) { showLifeLostFlash = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
+            withAnimation(.easeOut(duration: 0.2)) { self?.showLifeLostFlash = false }
+        }
     }
 
     private func updateLevelIfNeeded() {

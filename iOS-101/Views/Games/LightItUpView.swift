@@ -41,6 +41,9 @@ struct LightItUpView: View {
                     .shadow(color: vm.level.glowColor, radius: 16)
                     .allowsHitTesting(false)
             }
+            if vm.showLifeLostFlash {
+                Theme.neonRed.opacity(0.25).ignoresSafeArea().allowsHitTesting(false)
+            }
         }
         .onAppear {
             vm.onSessionEnd = { score in onSessionEnd?(.lightItUp, score) }
@@ -79,6 +82,7 @@ struct LightItUpView: View {
                     Text("\(vm.level.number)")
                         .font(.system(size: 44, weight: .black, design: .rounded))
                         .foregroundStyle(vm.level.glowColor)
+                    livesView
                 }
             }
             .padding(.horizontal, 28).padding(.top, 48)
@@ -110,5 +114,16 @@ struct LightItUpView: View {
                 .shadow(color: Color.indigo.opacity(0.4), radius: 12, x: 0, y: 6)
         }
         .sensoryFeedback(.impact(weight: .medium), trigger: vm.score)
+    }
+    
+    var livesView: some View {
+        HStack(spacing: 4) {
+            ForEach(0..<vm.maxLives, id: \.self) { i in
+                Image(systemName: i < vm.lives ? "heart.fill" : "heart")
+                    .font(.system(size: 16))
+                    .foregroundStyle(i < vm.lives ? Theme.neonRed : Theme.textSecondary.opacity(0.3))
+            }
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.5), value: vm.lives)
     }
 }
