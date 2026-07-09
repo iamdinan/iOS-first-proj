@@ -13,9 +13,11 @@ struct PlayHubApp: App {
 
     var body: some Scene {
         WindowGroup {
-            RootTabView()
-                .environment(locationService)
-                .task { locationService.requestPermission() }
+            NavigationStack {
+                RootTabView()
+            }
+            .environment(locationService)
+            .task { locationService.requestPermission() }
         }
     }
 }
