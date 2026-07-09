@@ -60,9 +60,10 @@ struct TapFrenzyView: View {
         VStack(spacing: 0) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("SCORE").font(.caption.bold()).foregroundStyle(.secondary)
+                    Text("SCORE").font(.caption.bold()).foregroundStyle(Theme.textSecondary)
                     Text("\(vm.score)")
                         .font(.system(size: 44, weight: .black, design: .rounded))
+                        .foregroundStyle(Theme.textPrimary)
                         .contentTransition(.numericText()).animation(.snappy, value: vm.score)
                 }
                 Spacer()
@@ -74,9 +75,17 @@ struct TapFrenzyView: View {
                 }
             }
             .padding(.horizontal, 28).padding(.top, 48)
-            Spacer()
-            tapButton
-            Spacer()
+
+            GeometryReader { geo in
+                tapButton
+                    .frame(width: 130, height: 130) // reduced from 200
+                    .position(
+                        x: geo.size.width * vm.buttonPosition.x,
+                        y: geo.size.height * vm.buttonPosition.y
+                    )
+                    .animation(.spring(response: 0.35, dampingFraction: 0.65), value: vm.buttonPosition.x)
+            }
+
             timerBar(current: vm.timeLeft, total: 10)
                 .padding(.bottom, 40)
         }
@@ -85,15 +94,15 @@ struct TapFrenzyView: View {
     var tapButton: some View {
         Button(action: vm.handleTap) {
             Text(vm.phase == .playing ? vm.buttonColor.label : "START")
-                .font(.system(size: 28, weight: .black, design: .rounded))
-                .frame(width: 200, height: 200)
-                .background(vm.phase == .playing ? vm.buttonColor.color : .blue)
-                .foregroundStyle(.white)
+                .font(.system(size: 20, weight: .black, design: .rounded)) // slightly smaller text to match smaller button
+                .frame(width: vm.phase == .playing ? 130 : 200,
+                       height: vm.phase == .playing ? 130 : 200)
+                .background(vm.phase == .playing ? vm.buttonColor.color : GameMode.tapFrenzy.themeColor)
+                .foregroundStyle(Theme.background)
                 .clipShape(Circle())
-                .shadow(color: (vm.phase == .playing ? vm.buttonColor.color : Color.blue).opacity(0.4),
-                        radius: 12, x: 0, y: 6)
+                .shadow(color: (vm.phase == .playing ? vm.buttonColor.color : GameMode.tapFrenzy.themeColor).opacity(0.6),
+                        radius: 16, x: 0, y: 0)
                 .scaleEffect(vm.phase == .playing ? 1.0 : 0.95)
-                .animation(.spring(response: 0.15, dampingFraction: 0.5), value: vm.score)
         }
         .disabled(vm.phase == .over)
         .sensoryFeedback(.impact(weight: .medium), trigger: vm.score)

@@ -8,29 +8,20 @@
 import SwiftUI
 
 struct ScoreBadge: View {
-    let mode:  GameMode
+    let mode: GameMode
     let score: Int
 
     var body: some View {
         HStack(spacing: 6) {
-            Image(systemName: mode.icon)
-                .font(.caption.bold())
-            Text("\(score)")
-                .font(.caption.bold())
+            Image(systemName: mode.icon).font(.caption.bold())
+            Text("\(score)").font(.system(.caption, design: .rounded).bold())
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 5)
-        .background(badgeColor.opacity(0.15))
-        .foregroundStyle(badgeColor)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
+        .background(mode.themeColor.opacity(0.18))
+        .foregroundStyle(mode.themeColor)
         .clipShape(Capsule())
-    }
-
-    private var badgeColor: Color {
-        switch mode {
-        case .tapFrenzy: return .blue
-        case .lightItUp: return .indigo
-        case .quizRush:  return .purple
-        }
+        .overlay(Capsule().strokeBorder(mode.themeColor.opacity(0.6), lineWidth: 1))
     }
 }
 

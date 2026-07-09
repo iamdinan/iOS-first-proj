@@ -11,26 +11,27 @@ import SwiftUI
 func timerBar(current: Int, total: Int) -> some View {
     let color: Color = {
         let ratio = Double(current) / Double(total)
-        if ratio > 0.6 { return .green }
+        if ratio > 0.6 { return Theme.neonGreen }
         if ratio > 0.3 { return .orange }
-        return .red
+        return Theme.neonRed
     }()
 
     return VStack(spacing: 8) {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(Color(.systemGray5))
+                Capsule().fill(Theme.surfaceLight)
                 Capsule()
                     .fill(color)
                     .frame(width: geo.size.width * CGFloat(current) / CGFloat(total))
+                    .shadow(color: color.opacity(0.7), radius: 8)
                     .animation(.linear(duration: 0.9), value: current)
             }
         }
-        .frame(height: 8)
+        .frame(height: 10)
         .padding(.horizontal, 28)
 
         Text("\(current)s")
-            .font(.system(size: 20, weight: .semibold, design: .rounded))
+            .font(.system(size: 22, weight: .black, design: .rounded))
             .foregroundStyle(color)
             .contentTransition(.numericText())
             .animation(.snappy, value: current)

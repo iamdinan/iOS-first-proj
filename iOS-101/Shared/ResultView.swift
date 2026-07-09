@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct ResultView: View {
-    let mode:         GameMode
-    let score:        Int
-    let isNewBest:    Bool
-    let accentColor:  Color
-    let onPlayAgain:  () -> Void
+    let mode: GameMode
+    let score: Int
+    let isNewBest: Bool
+    let accentColor: Color
+    let onPlayAgain: () -> Void
     let onShowScores: () -> Void
 
     private var shareText: String {
@@ -20,52 +20,46 @@ struct ResultView: View {
     }
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Time's Up!")
-                .font(.largeTitle.bold())
-            Text("Final Score")
-                .font(.headline)
-                .foregroundStyle(.secondary)
-            Text("\(score)")
-                .font(.system(size: 72, weight: .black, design: .rounded))
-                .foregroundStyle(accentColor)
+        VStack(spacing: 22) {
+            Text("TIME'S UP!")
+                .font(.system(size: 30, weight: .black, design: .rounded))
+                .foregroundStyle(Theme.textPrimary)
+
+            VStack(spacing: 4) {
+                Text("FINAL SCORE")
+                    .font(.system(.caption, design: .rounded).bold())
+                    .foregroundStyle(Theme.textSecondary)
+                Text("\(score)")
+                    .font(.system(size: 80, weight: .black, design: .rounded))
+                    .foregroundStyle(accentColor)
+                    .shadow(color: accentColor.opacity(0.6), radius: 20)
+            }
 
             if isNewBest {
-                Label("New High Score!", systemImage: "trophy.fill")
-                    .font(.subheadline.bold())
+                Label("NEW HIGH SCORE!", systemImage: "trophy.fill")
+                    .font(.system(.subheadline, design: .rounded).bold())
                     .foregroundStyle(.yellow)
+                    .shadow(color: .yellow.opacity(0.6), radius: 10)
             }
 
-            // Share
             ShareLink(item: shareText) {
                 Label("Share Score", systemImage: "square.and.arrow.up")
-                    .font(.subheadline.bold())
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Color(.systemGray6))
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
             }
+            .buttonStyle(ArcadeGhostButtonStyle(accent: accentColor))
             .padding(.horizontal, 40)
 
-            Button(action: onPlayAgain) {
-                Text("Play Again")
-                    .font(.title2.bold())
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(accentColor)
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 18))
-            }
-            .padding(.horizontal, 40)
+            Button("PLAY AGAIN", action: onPlayAgain)
+                .buttonStyle(ArcadeButtonStyle(accent: accentColor))
+                .padding(.horizontal, 40)
 
             Button(action: onShowScores) {
                 Label("High Scores", systemImage: "list.number")
-                    .font(.subheadline.bold())
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
             }
+            .buttonStyle(ArcadeGhostButtonStyle(accent: Theme.textSecondary))
             .padding(.horizontal, 40)
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Theme.background)
     }
 }

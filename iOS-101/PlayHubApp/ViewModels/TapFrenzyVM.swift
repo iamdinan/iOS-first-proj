@@ -16,6 +16,8 @@ final class TapFrenzyVM {
     var multiplier  = 1
     var buttonColor = ButtonColor.normal
     var isNewBest   = false
+    var buttonPosition = CGPoint(x: 0.5, y: 0.5)
+
 
     @ObservationIgnored var onSessionEnd: ((Int) -> Void)? = nil
 
@@ -46,6 +48,7 @@ final class TapFrenzyVM {
     func startGame() {
         score = 0; timeLeft = 10; multiplier = 1
         lastTapTime = nil; buttonColor = .normal
+        buttonPosition = CGPoint(x: 0.5, y: 0.5)
         phase = .playing; isNewBest = false
         scheduleColorChanges()
     }
@@ -69,20 +72,30 @@ final class TapFrenzyVM {
     }
 
     private func scheduleColorChanges() {
-        colorTimer?.invalidate()
-        let delay = Double.random(in: 1.5...3.0)
-        colorTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
-            guard let self, self.phase == .playing else { return }
-            let roll = Int.random(in: 0...3)
-            withAnimation(.easeInOut(duration: 0.25)) {
-                self.buttonColor = [.green, .grey, .normal, .normal][roll]
-            }
-            let hold = Double.random(in: 1.0...2.0)
-            Timer.scheduledTimer(withTimeInterval: hold, repeats: false) { [weak self] _ in
+            colorTimer?.invalidate()
+            let delay = Double.random(in: 1.5...3.0)
+            colorTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
                 guard let self, self.phase == .playing else { return }
-                withAnimation(.easeInOut(duration: 0.25)) { self.buttonColor = .normal }
-                self.scheduleColorChanges()
+                let roll = Int.random(in: 0...3)
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    self.buttonColor = [.green, .grey, .normal, .normal][roll]
+                    self.buttonPosition = CGPoint(
+                        x: Double.random(in: 0.15...0.85),
+                        y: Double.random(in: 0.15...0.85)
+                    )
+                }
+                let hold = Double.random(in: 1.0...2.0)
+                Timer.scheduledTimer(withTimeInterval: hold, repeats: false) { [weak self] _ in
+                    guard let self, self.phase == .playing else { return }
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                        self.buttonColor = .normal
+                        self.buttonPosition = CGPoint(
+                            x: Double.random(in: 0.15...0.85),
+                            y: Double.random(in: 0.15...0.85)
+                        )
+                    }
+                    self.scheduleColorChanges()
+                }
             }
         }
-    }
 }

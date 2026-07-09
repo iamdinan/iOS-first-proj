@@ -12,9 +12,9 @@ enum ButtonColor: CaseIterable {
 
     var color: Color {
         switch self {
-        case .normal: return .blue
-        case .green:  return .green
-        case .grey:   return Color(.systemGray3)
+        case .normal: return Color(red: 0.0, green: 0.831, blue: 1.0) // cyan
+        case .green:  return Theme.neonGreen
+        case .grey:   return Theme.neonRed
         }
     }
 
