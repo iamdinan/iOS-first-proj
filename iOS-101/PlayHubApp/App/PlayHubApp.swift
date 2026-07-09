@@ -7,9 +7,14 @@
 
 import SwiftUI
 
+// PlayHubApp.swift
 @main
 struct PlayHubApp: App {
     @State private var locationService = LocationService()
+
+    init() {
+        UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
+    }
 
     var body: some Scene {
         WindowGroup {
